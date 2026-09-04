@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ডিজিটাল রসিদ | মদিনাতুল উলূম</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="receipt.css">
+</head>
+<body>
+	<main class="app-shell">
+		<header class="app-header">
+			<img class="brand-logo" src="../লোগো.jpg" alt="মদিনাতুল উলূম মাদ্রাসার লোগো">
+			<div>
+				<p class="eyebrow">ডিজিটাল রসিদ ব্যবস্থাপনা</p>
+				<h1>মদিনাতুল উলূম দৃষ্টি প্রতিবন্ধী এতিমখানা</h1>
+				<h3 class="header-subtitle">লিল্লাহ বোর্ডিং মাদ্রাসা।</h3>
+			</div>
+			<div class="header-contact">
+				<span>যোগাযোগ</span>
+				<strong>+৮৮০১৯১৭২২৬৯৬৭</strong>
+				<strong>+৮৮০১৯৫৩৮০৮১৭১</strong>
+			</div>
+		</header>
+
+		<section class="workspace">
+			<form class="entry-panel" id="receiptForm">
+				<div class="section-heading">
+					<div><span class="section-number">০১</span><h2>দানের তথ্য লিখুন</h2></div>
+					<span class="required-note">* আবশ্যিক</span>
+				</div>
+				<div class="form-grid">
+					<label class="field"><span>ডিজিটাল রসিদ নম্বর <b>*</b></span><input id="receiptNumber" name="receiptNumber" required></label>
+					<label class="field"><span>তারিখ <b>*</b></span><input id="date" name="date" type="date" required></label>
+					<label class="field field-wide"><span>দাতার নাম <b>*</b></span><input id="donorName" name="donorName" placeholder="দাতার পূর্ণ নাম" required></label>
+					<label class="field"><span>মোবাইল নম্বর</span><input id="mobile" name="mobile" type="tel" placeholder="০১xxxxxxxxx"></label>
+					<label class="field field-wide"><span>ঠিকানা</span><input id="address" name="address" placeholder="দাতার ঠিকানা লিখুন"></label>
+					<label class="field"><span>টাকার পরিমাণ <b>*</b></span><div class="amount-input"><span>৳</span><input id="amount" name="amount" inputmode="decimal" placeholder="০.০০" required></div></label>
+					<label class="field field-wide"><span>দানের খাত <b>*</b></span><select id="sector" name="sector" required><option value="">খাত নির্বাচন করুন</option></select></label>
+					<label class="field field-wide"><span>অতিরিক্ত নোট</span><textarea id="note" name="note" rows="2" placeholder="প্রয়োজনে কোনো তথ্য লিখুন"></textarea></label>
+					<label class="field field-wide"><span>আদায়কারীর নাম / স্বাক্ষর <b>*</b></span><input id="collector" name="collector" placeholder="আদায়কারীর নাম লিখুন" required></label>
+				</div>
+				<div class="form-actions">
+					<button type="button" class="button secondary" id="clearButton">ফর্ম পরিষ্কার</button>
+					<button type="submit" class="button primary">রসিদ প্রস্তুত করুন <span aria-hidden="true">→</span></button>
+				</div>
+			</form>
+
+			<aside class="preview-panel">
+				<div class="preview-toolbar"><div><span class="live-dot"></span><span>লাইভ প্রিভিউ</span></div><button type="button" class="print-button" id="printButton" title="PDF হিসেবে সেভ বা প্রিন্ট করুন">⇩ <span>PDF সেভ করুন</span></button></div>
+				<article class="receipt" id="receiptPreview">
+					<div class="receipt-topline"></div>
+					<div class="receipt-head"><img class="receipt-logo" src="../লোগো.jpg" alt="মদিনাতুল উলূম মাদ্রাসার লোগো"><div><h1>মদিনাতুল উলূম দৃষ্টি প্রতিবন্ধী এতিমখানা</h1><h3>লিল্লাহ বোর্ডিং মাদ্রাসা।</h3></div></div>
+					<div class="receipt-address"><span>স্থায়ী: ছোট পাইটি, আমবাগান, স্টাফ কোয়ার্টার, ডেমরা-ঢাকা</span><span>অস্থায়ী: আদর্শবাগ, কোনাপাড়া, যাত্রাবাড়ী-ঢাকা</span></div>
+					<div class="receipt-title"><span>দান গ্রহণের রসিদ</span><div><small>রসিদ নং</small><strong id="previewNumber">MDU-000001</strong></div></div>
+					<div class="receipt-body">
+						<div class="receipt-row"><span>তারিখ</span><strong id="previewDate">—</strong></div>
+						<div class="receipt-row"><span>দাতার নাম</span><strong id="previewDonor">আপনার নাম</strong></div>
+						<div class="receipt-row"><span>মোবাইল</span><strong id="previewMobile">—</strong></div>
+						<div class="receipt-row"><span>ঠিকানা</span><strong id="previewAddress">—</strong></div>
+						<div class="receipt-row"><span>দানের খাত</span><strong id="previewSector">—</strong></div>
+						<div class="amount-row"><span>দানের পরিমাণ</span><strong>৳ <em id="previewAmount">০.০০</em></strong></div>
+						<div class="amount-words"><span>কথায়</span><strong id="previewWords">শূন্য টাকা মাত্র</strong></div>
+						<div class="receipt-note" id="previewNote">আল্লাহ আপনার দান কবুল করুন</div>
+					</div>
+					<div class="receipt-footer"><div class="signature"><strong id="previewCollector">আদায়কারীর নাম</strong><span>আদায়কারীর স্বাক্ষর</span></div><div class="seal">গ্রহণ করা হলো</div></div>
+				</article>
+				<p class="print-hint">PDF সেভ করতে বোতামে ক্লিক করে প্রিন্ট উইন্ডোতে “Save as PDF” নির্বাচন করুন।</p>
+			</aside>
+		</section>
+	</main>
+	<script src="receipt.js"></script>
+</body>
+</html>
