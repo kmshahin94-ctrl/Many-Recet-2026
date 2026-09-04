@@ -7,10 +7,14 @@ const sectors = [
 ];
 const bengaliDigits = '০১২৩৪৫৬৭৮৯';
 const ids = ['receiptNumber', 'date', 'donorName', 'mobile', 'address', 'amount', 'sector', 'note', 'collector'];
+const archiveKey = 'mduSavedReceipts';
 const get = id => document.getElementById(id);
 const toBengali = value => String(value).replace(/[0-9]/g, digit => bengaliDigits[digit]);
 const cleanAmount = value => String(value).replace(/[০-৯,\s]/g, char => bengaliDigits.indexOf(char) > -1 ? bengaliDigits.indexOf(char) : '').replace(/[^0-9.]/g, '');
 const formatAmount = value => { const number = Number(cleanAmount(value)); return Number.isFinite(number) && number ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(number) : '০.০০'; };
+const savedReceipts = () => JSON.parse(localStorage.getItem(archiveKey) || '[]');
+const saveReceipts = receipts => localStorage.setItem(archiveKey, JSON.stringify(receipts));
+const collectForm = () => Object.fromEntries(ids.map(id => [id, get(id).value]));
 const numberWords = value => {
     const number = Math.floor(Number(cleanAmount(value)) || 0);
     if (number === 0) return 'শূন্য টাকা মাত্র';
@@ -36,8 +40,29 @@ function updatePreview() {
     get('previewNote').textContent = get('note').value || 'আল্লাহ আপনার দান কবুল করুন';
     get('previewCollector').textContent = get('collector').value || 'আদায়কারীর নাম';
 }
+function renderArchive() {
+    const receipts = savedReceipts();
+    get('archiveCount').textContent = `${toBengali(receipts.length)}টি`;
+    get('archiveList').innerHTML = '';
+    if (!receipts.length) {
+        get('archiveList').innerHTML = '<p class="empty-archive">এখনো কোনো রসিদ সংরক্ষণ করা হয়নি।</p>';
+        return;
+    }
+    receipts.forEach(receipt => {
+        const item = document.createElement('div');
+        item.className = 'archive-item';
+        item.innerHTML = '<div class="archive-main"><strong></strong><span></span></div><div class="archive-meta"><strong></strong><span></span></div><div class="archive-actions"><button class="archive-button" data-action="view" data-id="' + receipt.id + '">দেখুন</button><button class="archive-button delete" data-action="delete" data-id="' + receipt.id + '">মুছুন</button></div>';
+        item.querySelector('.archive-main strong').textContent = receipt.donorName || 'নাম নেই';
+        item.querySelector('.archive-main span').textContent = `${receipt.receiptNumber} · ${receipt.sector || 'খাত নেই'}`;
+        item.querySelector('.archive-meta strong').textContent = `৳ ${toBengali(formatAmount(receipt.amount))}`;
+        item.querySelector('.archive-meta span').textContent = receipt.date || 'তারিখ নেই';
+        get('archiveList').appendChild(item);
+    });
+}
 ids.forEach(id => get(id).addEventListener('input', updatePreview));
-get('receiptForm').addEventListener('submit', event => { event.preventDefault(); localStorage.setItem('mduReceiptCount', Math.max(Number(localStorage.getItem('mduReceiptCount') || 0), Number(get('receiptNumber').value.replace(/\D/g, '')) || 0)); updatePreview(); });
+get('receiptForm').addEventListener('submit', event => { event.preventDefault(); const receipt = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...collectForm() }; const receipts = savedReceipts().filter(item => item.receiptNumber !== receipt.receiptNumber); receipts.unshift(receipt); saveReceipts(receipts); localStorage.setItem('mduReceiptCount', Math.max(Number(localStorage.getItem('mduReceiptCount') || 0), Number(receipt.receiptNumber.replace(/\D/g, '')) || 0)); renderArchive(); updatePreview(); });
 get('printButton').addEventListener('click', () => { updatePreview(); window.print(); });
 get('clearButton').addEventListener('click', () => { get('receiptForm').reset(); get('date').value = new Date().toISOString().slice(0, 10); get('receiptNumber').value = `MDU-${String(Number(localStorage.getItem('mduReceiptCount') || 0) + 1).padStart(6, '0')}`; updatePreview(); });
+get('archiveList').addEventListener('click', event => { const button = event.target.closest('[data-action]'); if (!button) return; const receipts = savedReceipts(); const receipt = receipts.find(item => item.id === button.dataset.id); if (button.dataset.action === 'delete') { saveReceipts(receipts.filter(item => item.id !== button.dataset.id)); renderArchive(); return; } if (receipt) { ids.forEach(id => { get(id).value = receipt[id] || ''; }); updatePreview(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
 updatePreview();
+renderArchive();
