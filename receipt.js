@@ -21,8 +21,9 @@ const numberWords = value => {
     const ones = ['', 'এক', 'দুই', 'তিন', 'চার', 'পাঁচ', 'ছয়', 'সাত', 'আট', 'নয়', 'দশ', 'এগারো', 'বারো', 'তেরো', 'চৌদ্দ', 'পনেরো', 'ষোল', 'সতেরো', 'আঠারো', 'উনিশ'];
     const tens = ['', '', 'বিশ', 'ত্রিশ', 'চল্লিশ', 'পঞ্চাশ', 'ষাট', 'সত্তর', 'আশি', 'নব্বই'];
     const underHundred = n => n < 20 ? ones[n] : `${tens[Math.floor(n / 10)]}${n % 10 ? ' ' + ones[n % 10] : ''}`;
-    let words = number >= 1000 ? `${underHundred(Math.floor(number / 1000))} হাজার ` : '';
-    words += underHundred(number % 1000);
+    const underThousand = n => n < 100 ? underHundred(n) : `${ones[Math.floor(n / 100)]} শত${n % 100 ? ' ' + underHundred(n % 100) : ''}`;
+    let words = number >= 1000 ? `${underThousand(Math.floor(number / 1000))} হাজার ` : '';
+    words += underThousand(number % 1000);
     return `${words.trim()} টাকা মাত্র`;
 };
 sectors.forEach(sector => get('sector').add(new Option(sector, sector)));
