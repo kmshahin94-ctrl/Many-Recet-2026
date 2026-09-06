@@ -10,6 +10,7 @@ const ids = ['receiptNumber', 'date', 'donorName', 'mobile', 'address', 'amount'
 const archiveKey = 'mduSavedReceipts';
 const get = id => document.getElementById(id);
 const toBengali = value => String(value).replace(/[0-9]/g, digit => bengaliDigits[digit]);
+const normalizeSearch = value => String(value || '').toLocaleLowerCase().replace(/[০-৯]/g, digit => bengaliDigits.indexOf(digit)).replace(/\s+/g, '');
 const cleanAmount = value => String(value).replace(/[০-৯,\s]/g, char => bengaliDigits.indexOf(char) > -1 ? bengaliDigits.indexOf(char) : '').replace(/[^0-9.]/g, '');
 const formatAmount = value => { const number = Number(cleanAmount(value)); return Number.isFinite(number) && number ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(number) : '০.০০'; };
 const savedReceipts = () => JSON.parse(localStorage.getItem(archiveKey) || '[]');
@@ -42,25 +43,30 @@ function updatePreview() {
     get('previewCollector').textContent = get('collector').value || 'আদায়কারীর নাম';
 }
 function renderArchive() {
-    const receipts = savedReceipts();
+    const allReceipts = savedReceipts();
+    const query = normalizeSearch(get('archiveSearch').value);
+    const receipts = query ? allReceipts.filter(receipt => [receipt.donorName, receipt.mobile, receipt.receiptNumber].some(value => normalizeSearch(value).includes(query))) : allReceipts;
     get('archiveCount').textContent = `${toBengali(receipts.length)}টি`;
     get('archiveList').innerHTML = '';
     if (!receipts.length) {
-        get('archiveList').innerHTML = '<p class="empty-archive">এখনো কোনো রসিদ সংরক্ষণ করা হয়নি।</p>';
+        get('archiveList').innerHTML = `<p class="empty-archive">${query ? 'এই নামে বা নম্বরে কোনো তথ্য পাওয়া যায়নি।' : 'এখনো কোনো রসিদ সংরক্ষণ করা হয়নি।'}</p>`;
         return;
     }
     receipts.forEach(receipt => {
         const item = document.createElement('div');
         item.className = 'archive-item';
-        item.innerHTML = '<div class="archive-main"><strong></strong><span></span></div><div class="archive-meta"><strong></strong><span></span></div><div class="archive-actions"><button class="archive-button" data-action="view" data-id="' + receipt.id + '">দেখুন</button><button class="archive-button delete" data-action="delete" data-id="' + receipt.id + '">মুছুন</button></div>';
+        item.innerHTML = '<div class="archive-main"><strong></strong><span></span></div><div class="archive-meta"><strong></strong><span></span></div><div class="archive-actions"><button class="archive-button" data-action="view" data-id="' + receipt.id + '">ফর্মে দেখুন</button><button class="archive-button delete" data-action="delete" data-id="' + receipt.id + '">মুছুন</button></div><div class="archive-details"><span><b>মোবাইল</b><i></i></span><span><b>ঠিকানা</b><i></i></span><span><b>দানের খাত</b><i></i></span><span><b>নোট</b><i></i></span><span><b>আদায়কারী</b><i></i></span></div>';
         item.querySelector('.archive-main strong').textContent = receipt.donorName || 'নাম নেই';
         item.querySelector('.archive-main span').textContent = `${receipt.receiptNumber} · ${receipt.sector || 'খাত নেই'}`;
         item.querySelector('.archive-meta strong').textContent = `৳ ${toBengali(formatAmount(receipt.amount))}`;
         item.querySelector('.archive-meta span').textContent = receipt.date || 'তারিখ নেই';
+        const details = item.querySelectorAll('.archive-details i');
+        [receipt.mobile || '—', receipt.address || '—', receipt.sector || '—', receipt.note || '—', receipt.collector || '—'].forEach((value, index) => { details[index].textContent = value; });
         get('archiveList').appendChild(item);
     });
 }
 ids.forEach(id => get(id).addEventListener('input', updatePreview));
+get('archiveSearch').addEventListener('input', renderArchive);
 get('receiptForm').addEventListener('submit', event => { event.preventDefault(); const receipt = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...collectForm() }; const receipts = savedReceipts().filter(item => item.receiptNumber !== receipt.receiptNumber); receipts.unshift(receipt); saveReceipts(receipts); localStorage.setItem('mduReceiptCount', Math.max(Number(localStorage.getItem('mduReceiptCount') || 0), Number(receipt.receiptNumber.replace(/\D/g, '')) || 0)); renderArchive(); updatePreview(); });
 get('printButton').addEventListener('click', () => { updatePreview(); window.print(); });
 get('clearButton').addEventListener('click', () => { get('receiptForm').reset(); get('date').value = new Date().toISOString().slice(0, 10); get('receiptNumber').value = `MDU-${String(Number(localStorage.getItem('mduReceiptCount') || 0) + 1).padStart(6, '0')}`; updatePreview(); });
